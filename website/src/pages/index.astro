@@ -1,49 +1,266 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import Header from "../components/Header.astro";
+import "../styles/global.css";
+
+const builds = [
+  {
+    number: "01",
+    title: "RESILIENT CLOUD PLATFORM",
+    description:
+      "Infrastructure patterns for private origins, controlled delivery, repeatable recovery, and observable change.",
+    tags: ["AWS", "TERRAFORM", "SRE"],
+    status: "SHIPPED",
+  },
+  {
+    number: "02",
+    title: "ML PLATFORM MODERNIZATION",
+    description:
+      "A production-shaped ML platform with isolated environments, managed persistence, deployment automation, and operational guardrails.",
+    tags: ["ECS", "RDS", "MLFLOW"],
+    status: "BUILDING",
+  },
+  {
+    number: "03",
+    title: "EGRESS CONTROL",
+    description:
+      "Policy-driven outbound access with infrastructure-as-code, explicit routing, auditable rules, and safer change control.",
+    tags: ["NETWORKING", "SECURITY", "AWS"],
+    status: "OPERATED",
+  },
+];
+
+const experience = [
+  {
+    period: "NOW",
+    role: "CLOUD / PLATFORM ENGINEERING",
+    detail:
+      "Designing and operating AWS infrastructure, reliability controls, networking, automation, and platform services.",
+  },
+  {
+    period: "FOCUS",
+    role: "SRE + RESILIENCE",
+    detail:
+      "Recovery engineering, infrastructure-as-code, observability, incident response, and reducing operational complexity.",
+  },
+];
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your{' '}
-				<code>astro.config.mjs</code> file. You can customize your setup with{' '}
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to{' '}
-				<a href="https://docs.astro.build/">read the docs</a>{' '}
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out{' '}
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>{' '}
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta
+      name="description"
+      content="The Drift Log — cloud infrastructure, platform engineering, SRE, and the changes behind reliable systems."
+    />
+    <meta name="theme-color" content="#0b0d0f" />
+    <title>The Drift Log</title>
+  </head>
+
+  <body>
+    <Header />
+
+    <div class="infra-ticker" aria-label="Decorative infrastructure status ticker">
+      <div class="ticker-track">
+        <span><b>●</b> SYSTEM NOMINAL</span>
+        <span>DRIFT: 0.00%</span>
+        <span>LAST CHANGE: CHG-0042</span>
+        <span>REGION: us-east-1</span>
+        <span>STATE: LOCKED</span>
+        <span>COFFEE: DEGRADED</span>
+
+        <span aria-hidden="true"><b>●</b> SYSTEM NOMINAL</span>
+        <span aria-hidden="true">DRIFT: 0.00%</span>
+        <span aria-hidden="true">LAST CHANGE: CHG-0042</span>
+        <span aria-hidden="true">REGION: us-east-1</span>
+        <span aria-hidden="true">STATE: LOCKED</span>
+        <span aria-hidden="true">COFFEE: DEGRADED</span>
+      </div>
+    </div>
+
+    <main>
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow">CLOUD INFRASTRUCTURE / PLATFORM ENGINEERING / SRE</p>
+
+          <h1>
+            Systems change.
+            <span>I keep the receipts.</span>
+          </h1>
+
+          <p class="hero-intro">
+            I build and operate cloud systems with a bias toward reliability,
+            repeatability, security, and knowing exactly what changed when
+            production develops opinions.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-link" href="#builds">VIEW BUILDS <span>↘</span></a>
+            <a class="secondary-link" href="/blog">READ THE LOG <span>→</span></a>
+          </div>
+
+          <p class="hero-note">// no unexplained drift detected. suspicious.</p>
+        </div>
+
+        <div class="monitor-wrap">
+          <div class="drift-monitor">
+            <div class="monitor-header">
+              <span>DRIFT MONITOR</span>
+              <span class="monitor-live">
+                <i aria-hidden="true"></i>
+                LIVE
+              </span>
+            </div>
+
+            <div class="monitor-context">
+              <div>
+                <span>environment</span>
+                <strong>prod</strong>
+              </div>
+              <div>
+                <span>region</span>
+                <strong>us-east-1</strong>
+              </div>
+            </div>
+
+            <div class="last-change">
+              <span class="monitor-label">LAST CHANGE</span>
+
+              <div class="change-row">
+                <div>
+                  <strong>CHG-0042</strong>
+                  <span>portfolio infrastructure</span>
+                </div>
+
+                <span class="passed">PASSED</span>
+              </div>
+            </div>
+
+            <div class="monitor-services">
+              <div>
+                <span>terraform-state</span>
+                <strong>locked</strong>
+              </div>
+              <div>
+                <span>cloudfront</span>
+                <strong>healthy</strong>
+              </div>
+              <div>
+                <span>s3-origin</span>
+                <strong>private</strong>
+              </div>
+              <div>
+                <span>drift-detected</span>
+                <strong>0</strong>
+              </div>
+            </div>
+
+            <div class="monitor-chart" aria-hidden="true">
+              <div class="bar" style="height: 22%"></div>
+              <div class="bar" style="height: 35%"></div>
+              <div class="bar" style="height: 28%"></div>
+              <div class="bar" style="height: 53%"></div>
+              <div class="bar" style="height: 44%"></div>
+              <div class="bar" style="height: 72%"></div>
+              <div class="bar" style="height: 58%"></div>
+              <div class="bar active" style="height: 82%"></div>
+            </div>
+
+            <div class="monitor-footer">
+              <span>STATE: CONSISTENT</span>
+              <span>LAST APPLY: 18:30 ET</span>
+            </div>
+          </div>
+
+          <p class="monitor-footnote">* production has opinions</p>
+        </div>
+      </section>
+
+      <section class="section shell" id="builds">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">01 / BUILDS</p>
+            <h2>Things that survived contact with reality.</h2>
+          </div>
+          <p class="section-side-note">// this looked simpler in the architecture diagram</p>
+        </div>
+
+        <div class="build-list">
+          {
+            builds.map((build) => (
+              <article class="build-row">
+                <div class="build-number">{build.number}</div>
+
+                <div class="build-copy">
+                  <div class="build-title-row">
+                    <h3>{build.title}</h3>
+                    <span class="build-status">{build.status}</span>
+                  </div>
+
+                  <p>{build.description}</p>
+
+                  <div class="tag-list">
+                    {build.tags.map((tag) => <span>{tag}</span>)}
+                  </div>
+                </div>
+
+                <span class="build-arrow" aria-hidden="true">↗</span>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section shell" id="experience">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">02 / EXPERIENCE</p>
+            <h2>Operate it. Break it carefully. Make it boring.</h2>
+          </div>
+        </div>
+
+        <div class="experience-grid">
+          {
+            experience.map((item) => (
+              <article class="experience-card">
+                <span class="experience-period">{item.period}</span>
+                <h3>{item.role}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))
+          }
+        </div>
+
+        <p class="margin-note">// rollback plan: yes</p>
+      </section>
+
+      <section class="section shell about-section" id="about">
+        <div>
+          <p class="section-kicker">03 / ABOUT</p>
+          <h2>Infrastructure should be explainable.</h2>
+        </div>
+
+        <div class="about-copy">
+          <p>
+            The Drift Log is where I document systems, platform decisions,
+            reliability work, architecture tradeoffs, and the occasional
+            “quick change” that became a much longer story.
+          </p>
+
+          <p>
+            The goal is simple: build systems that are easier to operate,
+            easier to recover, and easier for the next engineer to understand.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span>THE DRIFT LOG</span>
+        <span>No servers were harmed in the rendering of this website.</span>
+      </div>
+    </footer>
+  </body>
 </html>
