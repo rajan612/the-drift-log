@@ -54,6 +54,27 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
+resource "aws_cloudfront_function" "url_rewrite" {
+  name    = "the-drift-log-url-rewrite"
+  runtime = "cloudfront-js-2.0"
+  comment = "Rewrite clean URLs to Astro index.html files"
+  publish = true
+
+  code = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      var uri = request.uri;
+
+      if (uri.endsWith('/')) {
+        request.uri += 'index.html';
+      } else if (!uri.includes('.')) {
+        request.uri += '/index.html';
+      }
+
+      return request;
+    }
+  EOT
+}
 
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
@@ -90,6 +111,11 @@ resource "aws_cloudfront_distribution" "website" {
     ]
 
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.url_rewrite.arn
+    }
   }
 
   restrictions {
