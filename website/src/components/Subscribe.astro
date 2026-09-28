@@ -1,0 +1,219 @@
+<section class="subscribe">
+	<div class="subscribe-copy">
+		<p class="subscribe-kicker">STAY IN THE LOOP</p>
+
+		<h2>Get the next field note.</h2>
+
+		<p class="subscribe-description">
+			New posts on AWS, platform engineering, SRE, reliability,
+			and systems that had opinions.
+		</p>
+	</div>
+
+	<form
+		class="subscribe-form"
+		action="https://buttondown.com/api/emails/embed-subscribe/thedriftlog"
+		method="post"
+	>
+		<label class="sr-only" for="newsletter-email">
+			Email address
+		</label>
+
+		<div class="subscribe-controls">
+			<input
+				id="newsletter-email"
+				name="email"
+				type="email"
+				autocomplete="email"
+				placeholder="you@example.com"
+				required
+			/>
+
+			<button type="submit">
+				SUBSCRIBE <span aria-hidden="true">→</span>
+			</button>
+		</div>
+
+		<input type="hidden" value="1" name="embed" />
+
+		<div class="subscribe-meta">
+			<span>No spam. Just new entries.</span>
+			<a href="/rss.xml">RSS ↗</a>
+		</div>
+	</form>
+</section>
+
+<style>
+	.subscribe {
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(360px, 1fr);
+		gap: clamp(50px, 8vw, 110px);
+		align-items: end;
+
+		margin-top: 20px;
+		padding: 68px 0;
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.subscribe-kicker {
+		margin: 0 0 13px;
+		color: var(--accent);
+		font-family:
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			Monaco,
+			Consolas,
+			monospace;
+		font-size: 0.57rem;
+		letter-spacing: 0.1em;
+	}
+
+	.subscribe h2 {
+		margin: 0;
+		color: var(--text);
+		font-size: clamp(2rem, 3.5vw, 3.2rem);
+		line-height: 1.02;
+		letter-spacing: -0.04em;
+		font-weight: 520;
+	}
+
+	.subscribe-description {
+		max-width: 500px;
+		margin: 19px 0 0;
+		color: var(--muted);
+		line-height: 1.75;
+	}
+
+	.subscribe-form {
+		min-width: 0;
+	}
+
+	.subscribe-controls {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		border: 1px solid var(--border);
+		background: var(--panel);
+	}
+
+	.subscribe-controls input {
+		min-width: 0;
+		width: 100%;
+		padding: 17px 18px;
+
+		border: 0;
+		outline: 0;
+		background: transparent;
+		color: var(--text);
+
+		font: inherit;
+	}
+
+	.subscribe-controls input::placeholder {
+		color: var(--muted-2);
+	}
+
+	.subscribe-controls input:focus {
+		box-shadow: inset 0 0 0 1px var(--accent);
+	}
+
+	.subscribe-controls button {
+		padding: 0 21px;
+
+		border: 0;
+		border-left: 1px solid var(--border);
+		background: transparent;
+		color: var(--accent);
+
+		font-family:
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			Monaco,
+			Consolas,
+			monospace;
+		font-size: 0.57rem;
+		letter-spacing: 0.08em;
+
+		cursor: pointer;
+
+		transition:
+			background 160ms ease,
+			color 160ms ease;
+	}
+
+	.subscribe-controls button:hover {
+		background: var(--accent);
+		color: var(--bg);
+	}
+
+	.subscribe-controls button span {
+		margin-left: 6px;
+	}
+
+	.subscribe-meta {
+		display: flex;
+		justify-content: space-between;
+		gap: 20px;
+
+		margin-top: 12px;
+
+		color: var(--muted-2);
+		font-family:
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			Monaco,
+			Consolas,
+			monospace;
+		font-size: 0.52rem;
+		letter-spacing: 0.05em;
+	}
+
+	.subscribe-meta a {
+		color: var(--accent);
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	@media (max-width: 800px) {
+		.subscribe {
+			grid-template-columns: 1fr;
+			gap: 34px;
+			padding: 52px 0;
+		}
+
+		.subscribe-copy {
+			max-width: 600px;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.subscribe-controls {
+			grid-template-columns: 1fr;
+		}
+
+		.subscribe-controls button {
+			min-height: 49px;
+			border-left: 0;
+			border-top: 1px solid var(--border);
+		}
+
+		.subscribe-meta {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 7px;
+		}
+	}
+</style>

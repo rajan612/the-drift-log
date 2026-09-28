@@ -1,0 +1,172 @@
+<div
+  class="subscription-success"
+  data-subscription-success
+  role="status"
+  aria-live="polite"
+>
+  <span class="success-dot" aria-hidden="true"></span>
+
+  <div class="success-copy">
+    <strong>You're subscribed.</strong>
+    <span>The next field note will land in your inbox.</span>
+  </div>
+
+  <button
+    type="button"
+    data-subscription-close
+    aria-label="Dismiss subscription message"
+  >
+    ×
+  </button>
+</div>
+
+<script is:inline>
+  (() => {
+    const showSubscriptionSuccess = () => {
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("subscribed") !== "1") {
+        return;
+      }
+
+      const notice = document.querySelector("[data-subscription-success]");
+      const close = document.querySelector("[data-subscription-close]");
+
+      if (!notice) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        notice.classList.add("is-visible");
+      });
+
+      const cleanUrl =
+        window.location.pathname +
+        window.location.hash;
+
+      window.history.replaceState(
+        {},
+        document.title,
+        cleanUrl
+      );
+
+      const dismiss = () => {
+        notice.classList.remove("is-visible");
+      };
+
+      close?.addEventListener("click", dismiss);
+
+      window.setTimeout(dismiss, 7000);
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener(
+        "DOMContentLoaded",
+        showSubscriptionSuccess,
+        { once: true }
+      );
+    } else {
+      showSubscriptionSuccess();
+    }
+  })();
+</script>
+
+<style>
+  .subscription-success {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    z-index: 1000;
+
+    width: min(420px, calc(100vw - 36px));
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+
+    padding: 18px 19px;
+
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+
+    box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.45),
+      inset 0 1px rgba(255, 255, 255, 0.025);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px);
+
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      visibility 180ms ease;
+  }
+
+  .subscription-success.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .success-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+    background: var(--accent);
+
+    box-shadow:
+      0 0 0 4px rgba(240, 164, 93, 0.08),
+      0 0 14px var(--accent);
+  }
+
+  .success-copy {
+    min-width: 0;
+  }
+
+  .success-copy strong {
+    display: block;
+    margin-bottom: 4px;
+
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .success-copy span {
+    display: block;
+
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .subscription-success button {
+    padding: 4px 6px;
+
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+
+    font-size: 1.15rem;
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+  .subscription-success button:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .subscription-success {
+      right: 18px;
+      bottom: 18px;
+    }
+  }
+</style>

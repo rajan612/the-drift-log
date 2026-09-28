@@ -1,6 +1,18 @@
 ---
 import { site } from "../config/site";
+import "../styles/theme.css";
 ---
+
+<script is:inline>
+  (() => {
+    const saved = localStorage.getItem("drift-theme");
+    const preferred = window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
+
+    document.documentElement.dataset.theme = saved || preferred;
+  })();
+</script>
 
 <header class="site-header">
   <div class="header-inner">
@@ -22,6 +34,38 @@ import { site } from "../config/site";
       <a href={site.github} target="_blank" rel="noreferrer">GITHUB</a>
       <a href={site.resume}>RESUME ↓</a>
 
+      <button
+        type="button"
+        class="theme-toggle"
+        data-theme-toggle
+        aria-label="Toggle color theme"
+        title="Toggle color theme"
+      >
+        <svg
+          class="theme-icon theme-icon-sun"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="M4.93 4.93l1.41 1.41"></path>
+          <path d="M17.66 17.66l1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="M6.34 17.66l-1.41 1.41"></path>
+          <path d="M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+
+        <svg
+          class="theme-icon theme-icon-moon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
       <span class="availability">
         <i aria-hidden="true"></i>
         {site.availability}
@@ -29,3 +73,29 @@ import { site } from "../config/site";
     </nav>
   </div>
 </header>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const button = document.querySelector("[data-theme-toggle]");
+
+    if (!button) return;
+
+    button.addEventListener("click", () => {
+      const current =
+        document.documentElement.dataset.theme === "light"
+          ? "light"
+          : "dark";
+
+      const next = current === "dark" ? "light" : "dark";
+
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("drift-theme", next);
+
+      window.dispatchEvent(
+        new CustomEvent("drift-theme-change", {
+          detail: { theme: next },
+        })
+      );
+    });
+  });
+</script>

@@ -1,0 +1,147 @@
+<section class="comments-section">
+	<div class="comments-heading">
+		<div>
+			<p class="comments-kicker">DISCUSSION</p>
+			<h2>Comments & questions.</h2>
+		</div>
+
+		<p class="comments-note">
+			// powered by GitHub Discussions
+		</p>
+	</div>
+
+	<div class="giscus-container" data-giscus-root></div>
+</section>
+
+<script is:inline>
+	(() => {
+		const root = document.querySelector("[data-giscus-root]");
+
+		if (!root || root.dataset.loaded === "true") return;
+
+		root.dataset.loaded = "true";
+
+		const getTheme = () =>
+			document.documentElement.dataset.theme === "light"
+				? "light"
+				: "dark";
+
+		const script = document.createElement("script");
+
+		script.src = "https://giscus.app/client.js";
+		script.async = true;
+		script.crossOrigin = "anonymous";
+
+		script.setAttribute("data-repo", "rajan612/the-drift-log");
+		script.setAttribute("data-repo-id", "R_kgDOUvBvUg");
+		script.setAttribute("data-category", "Blog Comments");
+		script.setAttribute(
+			"data-category-id",
+			"DIC_kwDOUvBvUs4DGjUO"
+		);
+
+		script.setAttribute("data-mapping", "pathname");
+		script.setAttribute("data-strict", "0");
+		script.setAttribute("data-reactions-enabled", "1");
+		script.setAttribute("data-emit-metadata", "0");
+		script.setAttribute("data-input-position", "bottom");
+		script.setAttribute("data-theme", getTheme());
+		script.setAttribute("data-lang", "en");
+		script.setAttribute("data-loading", "lazy");
+
+		root.appendChild(script);
+
+		window.addEventListener("drift-theme-change", (event) => {
+			const iframe = document.querySelector(
+				"iframe.giscus-frame"
+			);
+
+			if (!iframe?.contentWindow) return;
+
+			const theme =
+				event.detail?.theme === "light"
+					? "light"
+					: "dark";
+
+			iframe.contentWindow.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme,
+						},
+					},
+				},
+				"https://giscus.app"
+			);
+		});
+	})();
+</script>
+
+<style>
+	.comments-section {
+		margin-top: 26px;
+		padding-top: 70px;
+		border-top: 1px solid var(--border);
+	}
+
+	.comments-heading {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 36px;
+		margin-bottom: 48px;
+	}
+
+	.comments-kicker {
+		margin: 0 0 12px;
+		color: var(--accent);
+		font-family:
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			Monaco,
+			Consolas,
+			monospace;
+		font-size: 0.57rem;
+		letter-spacing: 0.1em;
+	}
+
+	.comments-heading h2 {
+		margin: 0;
+		color: var(--text);
+		font-size: clamp(1.8rem, 3vw, 2.6rem);
+		line-height: 1.05;
+		letter-spacing: -0.035em;
+		font-weight: 520;
+	}
+
+	.comments-note {
+		margin: 0;
+		color: var(--muted-2);
+		font-family:
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			Monaco,
+			Consolas,
+			monospace;
+		font-size: 0.55rem;
+	}
+
+	.giscus-container {
+		min-height: 120px;
+	}
+
+	@media (max-width: 680px) {
+		.comments-section {
+			padding-top: 52px;
+		}
+
+		.comments-heading {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 12px;
+			margin-bottom: 35px;
+		}
+	}
+</style>
