@@ -11,7 +11,16 @@ data "aws_route53_zone" "website" {
   name         = local.domain_name
   private_zone = false
 }
+resource "aws_route53_record" "google_site_verification" {
+  zone_id = data.aws_route53_zone.website.zone_id
+  name    = local.domain_name
+  type    = "TXT"
+  ttl     = 300
 
+  records = [
+    "google-site-verification=qsTd90oZ1Ei2hsfMN9DgjNlJrDZ9Z8usuDVNtYfwC4w"
+  ]
+}
 resource "aws_acm_certificate" "website" {
   domain_name = local.domain_name
 
