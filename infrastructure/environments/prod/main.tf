@@ -3,7 +3,13 @@ data "aws_caller_identity" "current" {}
 data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
 
+data "aws_cloudfront_origin_request_policy" "all_viewer_except_host_header" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
 locals {
   website_bucket_name = "the-drift-log-site-${data.aws_caller_identity.current.account_id}"
 }
@@ -98,6 +104,53 @@ resource "aws_cloudfront_distribution" "website" {
     s3_origin_config {
       origin_access_identity = ""
     }
+  }
+
+  origin {
+    domain_name = replace(
+      aws_apigatewayv2_api.page_views.api_endpoint,
+      "https://",
+      ""
+    )
+
+    origin_id = "the-drift-log-page-views-api"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+
+      origin_ssl_protocols = [
+        "TLSv1.2"
+      ]
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern     = "/api/views*"
+    target_origin_id = "the-drift-log-page-views-api"
+
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    allowed_methods = [
+      "DELETE",
+      "GET",
+      "HEAD",
+      "OPTIONS",
+      "PATCH",
+      "POST",
+      "PUT"
+    ]
+
+    cached_methods = [
+      "GET",
+      "HEAD"
+    ]
+
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
+
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host_header.id
   }
 
   default_cache_behavior {

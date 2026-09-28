@@ -25,3 +25,5 @@ dist/
 # IDE
 .vscode/
 .idea/
+# Generated Lambda packages
+infrastructure/environments/prod/lambda/*.zip

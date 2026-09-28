@@ -29,6 +29,8 @@ const { title, description, pubDate, updatedDate } = Astro.props;
 						<span>FIELD NOTE</span>
 						<span>•</span>
 						<FormattedDate date={pubDate} />
+						<span>•</span>
+						<span class="view-count" data-page-view-count>— VIEWS</span>
 					</div>
 
 					<h1>{title}</h1>
@@ -123,6 +125,10 @@ const { title, description, pubDate, updatedDate } = Astro.props;
 			monospace;
 		font-size: 0.59rem;
 		letter-spacing: 0.08em;
+	}
+
+	.view-count {
+		color: var(--muted);
 	}
 
 	.article-header h1 {

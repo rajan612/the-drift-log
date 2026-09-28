@@ -1,0 +1,104 @@
+<script is:inline>
+  (() => {
+    const run = async () => {
+      let path = window.location.pathname || "/";
+
+      // Match the normalization used by the Lambda.
+      if (path !== "/") {
+        path = path.replace(/\/+$/, "");
+      }
+
+      // Do not write production counters while running Astro locally.
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
+        return;
+      }
+
+      const sessionKey = `drift-view-counted:${path}`;
+
+      let alreadyCounted = false;
+
+      try {
+        alreadyCounted =
+          window.sessionStorage.getItem(sessionKey) === "1";
+      } catch {
+        // Continue without session storage if the browser blocks it.
+      }
+
+      try {
+        const response = alreadyCounted
+          ? await fetch(
+              `/api/views?path=${encodeURIComponent(path)}`,
+              {
+                method: "GET",
+                cache: "no-store",
+              }
+            )
+          : await fetch("/api/views", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ path }),
+              cache: "no-store",
+            });
+
+        if (!response.ok) {
+          throw new Error(`Page view API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!alreadyCounted) {
+          try {
+            window.sessionStorage.setItem(sessionKey, "1");
+          } catch {
+            // Counter still works if storage is unavailable.
+          }
+        }
+
+        const pageViews = Number(data.page_views ?? 0);
+        const siteViews = Number(data.site_views ?? 0);
+
+        document
+          .querySelectorAll("[data-page-view-count]")
+          .forEach((element) => {
+            element.textContent =
+              `${pageViews.toLocaleString()} ` +
+              `${pageViews === 1 ? "VIEW" : "VIEWS"}`;
+          });
+
+        document
+          .querySelectorAll("[data-site-view-count]")
+          .forEach((element) => {
+            element.textContent =
+              `${siteViews.toLocaleString()} PAGE VIEWS`;
+          });
+
+        window.dispatchEvent(
+          new CustomEvent("drift-view-count", {
+            detail: {
+              path,
+              pageViews,
+              siteViews,
+            },
+          })
+        );
+      } catch (error) {
+        console.warn("Page view counter unavailable.", error);
+      }
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener(
+        "DOMContentLoaded",
+        run,
+        { once: true }
+      );
+    } else {
+      run();
+    }
+  })();
+</script>
