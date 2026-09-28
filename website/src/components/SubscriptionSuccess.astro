@@ -3,6 +3,7 @@
   data-subscription-success
   role="status"
   aria-live="polite"
+  aria-atomic="true"
 >
   <span class="success-dot" aria-hidden="true"></span>
 
@@ -24,22 +25,44 @@
   (() => {
     const showSubscriptionSuccess = () => {
       const params = new URLSearchParams(window.location.search);
+      const rawSearch = window.location.search;
 
-      if (params.get("subscribed") !== "1") {
+      /*
+       * Buttondown may redirect in either of these forms:
+       *
+       * ?email_address=user@example.com
+       *
+       * or, if an older redirect setting is still active:
+       *
+       * ?subscribed=1?email_address=user@example.com
+       *
+       * Support both so the success notification remains reliable.
+       */
+      const subscribed =
+        params.get("subscribed") === "1" ||
+        params.has("email_address") ||
+        rawSearch.includes("email_address=");
+
+      if (!subscribed) {
         return;
       }
 
-      const notice = document.querySelector("[data-subscription-success]");
-      const close = document.querySelector("[data-subscription-close]");
+      const notice = document.querySelector(
+        "[data-subscription-success]"
+      );
+
+      const close = document.querySelector(
+        "[data-subscription-close]"
+      );
 
       if (!notice) {
         return;
       }
 
-      requestAnimationFrame(() => {
-        notice.classList.add("is-visible");
-      });
-
+      /*
+       * Remove Buttondown's email/query information from the
+       * address bar immediately after detecting success.
+       */
       const cleanUrl =
         window.location.pathname +
         window.location.hash;
@@ -50,13 +73,32 @@
         cleanUrl
       );
 
+      /*
+       * Show the notification after the first paint so the
+       * entrance transition works consistently.
+       */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          notice.classList.add("is-visible");
+        });
+      });
+
+      let dismissTimer;
+
       const dismiss = () => {
         notice.classList.remove("is-visible");
+
+        if (dismissTimer) {
+          window.clearTimeout(dismissTimer);
+        }
       };
 
       close?.addEventListener("click", dismiss);
 
-      window.setTimeout(dismiss, 7000);
+      dismissTimer = window.setTimeout(
+        dismiss,
+        7000
+      );
     };
 
     if (document.readyState === "loading") {
@@ -116,6 +158,7 @@
   .success-dot {
     width: 9px;
     height: 9px;
+    flex-shrink: 0;
 
     border-radius: 50%;
     background: var(--accent);
@@ -153,20 +196,46 @@
     background: transparent;
     color: var(--muted);
 
+    font-family: inherit;
     font-size: 1.15rem;
     line-height: 1;
 
     cursor: pointer;
+
+    transition: color 160ms ease;
   }
 
   .subscription-success button:hover {
     color: var(--accent);
   }
 
+  .subscription-success button:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  html[data-theme="light"] .subscription-success {
+    box-shadow:
+      0 24px 70px rgba(40, 35, 28, 0.16),
+      inset 0 1px rgba(255, 255, 255, 0.35);
+  }
+
   @media (max-width: 600px) {
     .subscription-success {
       right: 18px;
       bottom: 18px;
+      width: calc(100vw - 36px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .subscription-success {
+      transition: none;
+      transform: none;
+    }
+
+    .subscription-success.is-visible {
+      transform: none;
     }
   }
 </style>
