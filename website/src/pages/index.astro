@@ -1,7 +1,8 @@
 ---
+import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import SubscriptionSuccess from "../components/SubscriptionSuccess.astro";
-import "../styles/global.css";
+import { SITE_DESCRIPTION } from "../consts";
 
 const builds = [
   {
@@ -49,14 +50,11 @@ const experience = [
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta
-      name="description"
-      content="The Drift Log — cloud infrastructure, platform engineering, SRE, and the changes behind reliable systems."
+    <BaseHead
+      title="The Drift Log | Cloud Infrastructure, Platform Engineering & SRE"
+      description={SITE_DESCRIPTION}
     />
     <meta name="theme-color" content="#0b0d0f" />
-    <title>The Drift Log</title>
   </head>
 
   <body>

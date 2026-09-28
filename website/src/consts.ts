@@ -1,3 +1,3 @@
 export const SITE_TITLE = 'The Drift Log';
 export const SITE_DESCRIPTION =
-	'Cloud, infrastructure, platform engineering, reliability, and the occasional drift.';
+	'The Drift Log covers AWS, cloud infrastructure, Terraform, platform engineering, SRE, reliability, networking, and lessons from operating production systems.';
