@@ -4,7 +4,7 @@ export const site = {
   email: "rajan612@gmail.com",
   linkedin: "https://www.linkedin.com/in/rvashishtiit/",
   github: "https://github.com/rajan612",
-  resume: "/resume.pdf",
+  resume: "/resume/",
 
   availability: "OPEN TO INTERESTING SYSTEMS",
 };

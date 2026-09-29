@@ -1,0 +1,113 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Resume | The Drift Log"
+      description="Resume and professional experience in cloud infrastructure, platform engineering, AWS, SRE, and reliability."
+    />
+  </head>
+
+  <body>
+    <Header />
+
+    <main class="resume-page">
+      <div class="resume-bar shell">
+        <div>
+          <p class="resume-kicker">RESUME / EXPERIENCE</p>
+          <h1>Rajan Vashisht</h1>
+        </div>
+
+        <a class="download-link" href="/resume.pdf" download>
+          DOWNLOAD PDF ↓
+        </a>
+      </div>
+
+      <div class="resume-frame shell">
+        <iframe
+          src="/resume.pdf"
+          title="Rajan Vashisht Resume"
+        ></iframe>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .resume-page {
+    padding: 72px 0 90px;
+  }
+
+  .resume-bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .resume-kicker {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 520;
+  }
+
+  .download-link {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent);
+    color: var(--accent);
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+  }
+
+  .resume-frame {
+    height: calc(100vh - 230px);
+    min-height: 720px;
+  }
+
+  .resume-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+
+  @media (max-width: 700px) {
+    .resume-bar {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .resume-frame {
+      height: 78vh;
+      min-height: 620px;
+    }
+  }
+</style>
