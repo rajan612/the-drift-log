@@ -4,16 +4,23 @@ html {
 
 html[data-theme="light"] {
   color-scheme: light;
-
-  --bg: #f2efe9;
-  --panel: #e9e5de;
-  --panel-soft: #eeeae3;
-  --text: #202326;
-  --muted: #666b70;
-  --muted-2: #8b8f93;
-  --border: #d2ccc2;
-  --accent: #c66f2b;
-  --blue: #34788a;
+  --bg: #f5f2ec;
+  --panel: #ebe7df;
+  --panel-soft: #f0ece5;
+  --text: #1c2429;
+  --body-copy: #4f5a60;
+  --muted: #626b71;
+  --muted-2: #8b9297;
+  --border: #d3cec5;
+  --accent: #c96f2b;
+  --blue: #327f91;
+  --success: #3c8b61;
+  --warning: #c96f2b;
+  --danger: #bd504c;
+  --violet: #7567a4;
+  --accent-soft: rgba(201, 111, 43, 0.1);
+  --blue-soft: rgba(50, 127, 145, 0.1);
+  --success-soft: rgba(60, 139, 97, 0.1);
 }
 
 .theme-toggle {
