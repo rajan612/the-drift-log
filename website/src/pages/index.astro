@@ -65,14 +65,14 @@ const experience = [
       <div class="ticker-track">
         <span><b>●</b> SYSTEM NOMINAL</span>
         <span>DRIFT: 0.00%</span>
-        <span>LAST CHANGE: CHG-0042</span>
+        <span>LAST RELEASE: v—</span>
         <span>REGION: us-east-1</span>
         <span>STATE: LOCKED</span>
         <span>COFFEE: DEGRADED</span>
 
         <span aria-hidden="true"><b>●</b> SYSTEM NOMINAL</span>
         <span aria-hidden="true">DRIFT: 0.00%</span>
-        <span aria-hidden="true">LAST CHANGE: CHG-0042</span>
+        <span aria-hidden="true">LAST RELEASE: v—</span>
         <span aria-hidden="true">REGION: us-east-1</span>
         <span aria-hidden="true">STATE: LOCKED</span>
         <span aria-hidden="true">COFFEE: DEGRADED</span>
@@ -125,15 +125,27 @@ const experience = [
             </div>
 
             <div class="last-change">
-              <span class="monitor-label">LAST CHANGE</span>
+              <span class="monitor-label">LAST RELEASE</span>
 
               <div class="change-row">
                 <div>
-                  <strong>CHG-0042</strong>
+                  <strong data-release-version>v—</strong>
                   <span>portfolio infrastructure</span>
                 </div>
 
                 <span class="passed">PASSED</span>
+              </div>
+
+              <div class="change-row">
+                <div>
+                  <strong data-deployed-at>—</strong>
+                  <span>deployed</span>
+                </div>
+
+                <div>
+                  <strong data-release-commit>—</strong>
+                  <span>commit</span>
+                </div>
               </div>
             </div>
 
@@ -255,6 +267,52 @@ const experience = [
         </div>
       </section>
     </main>
+
+    <script>
+      const formatDeployedAt = (value) => {
+        if (!value) return "—";
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+
+        return new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "America/New_York",
+          timeZoneName: "short",
+        }).format(date);
+      };
+
+      const loadReleaseMetadata = async () => {
+        try {
+          const response = await fetch("/release.json", { cache: "no-store" });
+          if (!response.ok) return;
+
+          const release = await response.json();
+          const tag = release.tag || (release.version ? `v${release.version}` : "v—");
+          const commit = release.commit ? release.commit.slice(0, 7) : "—";
+
+          document.querySelectorAll("[data-release-version]").forEach((element) => {
+            element.textContent = tag;
+          });
+
+          document.querySelectorAll("[data-deployed-at]").forEach((element) => {
+            element.textContent = formatDeployedAt(release.deployedAt);
+          });
+
+          document.querySelectorAll("[data-release-commit]").forEach((element) => {
+            element.textContent = commit;
+          });
+        } catch {
+          // Keep the static fallback values when release metadata is unavailable.
+        }
+      };
+
+      loadReleaseMetadata();
+    </script>
 
     <footer class="site-footer">
       <div class="shell footer-inner">
