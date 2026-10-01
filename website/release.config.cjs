@@ -9,7 +9,7 @@ module.exports = {
         releaseRules: [
           { breaking: true, release: "major" },
           { type: "feat", release: "minor" },
-          { type: "*", release: "patch" }
+          { header: "*", release: "patch" }
         ]
       }
     ],
