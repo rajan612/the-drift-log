@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="822" viewBox="0 0 720 822" role="img" aria-labelledby="title desc">
+<title id="title">From intent to code — governed agentic delivery</title>
+<desc id="desc">Requirements, planning, implementation, and validation lead to a pre-PR security gate. Findings trigger remediation and revalidation; unresolved findings block publication. A passing scan requires human publication approval before creating a pull request. Human code review and CI/CD precede authorized merge and release.</desc>
+<defs>
+ <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#85949e"/></marker>
+ <marker id="green" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#91c8ab"/></marker>
+ <marker id="amber" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#e6bb7b"/></marker>
+ <style>
+ text{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+ .normal{fill:#191f24;stroke:#46545e;stroke-width:1.2}
+ .security{fill:#172923;stroke:#91c8ab;stroke-width:1.4}
+ .human{fill:#30271c;stroke:#e6bb7b;stroke-width:1.4}
+ .remedy{fill:#20262e;stroke:#8fc7d6;stroke-width:1.3}
+ .blocked{fill:#322124;stroke:#e3a1a1;stroke-width:1.3}
+ .label{font-size:15.5px;font-weight:650;fill:#f3f0e9}
+ .sub{font-size:11.5px;fill:#c3c8c9}
+ .arrow{fill:none;stroke:#85949e;stroke-width:1.5;marker-end:url(#arrow)}
+ .pass{stroke:#91c8ab;marker-end:url(#green)}
+ .loop{fill:none;stroke:#e6bb7b;stroke-width:1.5;stroke-dasharray:5 4;marker-end:url(#amber)}
+ .note{font-size:11px;fill:#c3c8c9}
+ </style>
+</defs>
+<rect x="1" y="1" width="718" height="820" rx="14" fill="#101417" stroke="#39434b"/>
+<text x="28" y="32" font-size="12" letter-spacing="1.8" font-weight="650" fill="#8fc7d6">REFERENCE ARCHITECTURE</text>
+<text x="28" y="54" font-size="19" font-weight="650" fill="#f3f0e9">From intent to code</text>
+<path d="M225 130 V147" class="arrow "/>
+<path d="M225 206 V223" class="arrow "/>
+<path d="M225 282 V299" class="arrow "/>
+<path d="M225 358 V375" class="arrow "/>
+<path d="M225 434 V499" class="arrow pass"/>
+<path d="M225 558 V575" class="arrow "/>
+<path d="M225 634 V651" class="arrow "/>
+<path d="M225 710 V727" class="arrow "/>
+<g><rect x="28" y="76" width="394" height="54" rx="9" class="normal"/><text x="225" y="98" class="label" text-anchor="middle">Human intent &amp; requirements</text><text x="225" y="116" class="sub" text-anchor="middle">Scope · constraints · acceptance criteria</text></g>
+<g><rect x="28" y="152" width="394" height="54" rx="9" class="normal"/><text x="225" y="174" class="label" text-anchor="middle">Plan &amp; independent review</text><text x="225" y="192" class="sub" text-anchor="middle">Design decisions · risks · verification strategy</text></g>
+<g><rect x="28" y="228" width="394" height="54" rx="9" class="normal"/><text x="225" y="250" class="label" text-anchor="middle">Implementation agent</text><text x="225" y="268" class="sub" text-anchor="middle">Isolated Git working copy</text></g>
+<g><rect x="28" y="304" width="394" height="54" rx="9" class="normal"/><text x="225" y="326" class="label" text-anchor="middle">Deterministic validation</text><text x="225" y="344" class="sub" text-anchor="middle">Functional · integration · regression checks</text></g>
+<g><rect x="28" y="380" width="394" height="54" rx="9" class="security"/><text x="225" y="402" class="label" text-anchor="middle">Pre-PR security gate</text><text x="225" y="420" class="sub" text-anchor="middle">Independent security scan</text></g>
+<g><rect x="28" y="504" width="394" height="54" rx="9" class="human"/><text x="225" y="526" class="label" text-anchor="middle">Human publication approval</text><text x="225" y="544" class="sub" text-anchor="middle">Authorize creation of the pull request</text></g>
+<g><rect x="28" y="580" width="394" height="54" rx="9" class="normal"/><text x="225" y="602" class="label" text-anchor="middle">Reviewable pull request</text><text x="225" y="620" class="sub" text-anchor="middle">Requirement link · evidence · reviewers</text></g>
+<g><rect x="28" y="656" width="394" height="54" rx="9" class="human"/><text x="225" y="678" class="label" text-anchor="middle">Human code review + CI/CD</text><text x="225" y="696" class="sub" text-anchor="middle">Independent checks and merge decision</text></g>
+<g><rect x="28" y="732" width="394" height="54" rx="9" class="security"/><text x="225" y="754" class="label" text-anchor="middle">Authorized merge / release</text><text x="225" y="772" class="sub" text-anchor="middle">Existing delivery controls</text></g>
+<text x="237" y="468" class="note" fill="#91c8ab">Security validation passes</text>
+<path d="M422 407 H472" class="arrow"/>
+<text x="447" y="395" class="note" text-anchor="middle">Findings</text>
+<g><rect x="478" y="380" width="214" height="54" rx="9" class="remedy"/><text x="585" y="402" class="label" text-anchor="middle">Remediation agent</text><text x="585" y="420" class="sub" text-anchor="middle">Propose targeted fix</text></g>
+<path d="M585 434 V452" class="arrow"/>
+<g><rect x="478" y="458" width="214" height="54" rx="9" class="remedy"/><text x="585" y="480" class="label" text-anchor="middle">Revalidate changes</text><text x="585" y="498" class="sub" text-anchor="middle">Rerun relevant tests</text></g>
+<path d="M692 485 H704 V365 H225 V375" class="loop"/>
+<text x="575" y="354" class="note" text-anchor="middle">Rescan · bounded retries</text>
+<path d="M585 512 V566" class="arrow"/>
+<text x="596" y="539" class="note">Unresolved</text>
+<g><rect x="478" y="572" width="214" height="66" rx="9" class="blocked"/><text x="585" y="594" class="label" text-anchor="middle">Block publication</text><text x="585" y="612" class="sub" text-anchor="middle">Escalate to human review</text></g>
+<text x="28" y="805" class="note">Two distinct human decisions: publish the proposed change; authorize its merge.</text>
+</svg>
