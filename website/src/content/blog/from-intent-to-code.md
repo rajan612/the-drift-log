@@ -18,7 +18,7 @@ This article explores a generalized reference architecture for governed, agentic
 
 ## CI/CD solved a different problem
 
-Traditional CI/CD starts with a change that already exists.
+Traditional CI/CD typically begins once a proposed code change exists. It automates building, testing, validating, and delivering software, but it does not inherently determine whether the original requirement was understood correctly.
 
 ```text
 Code change → Build → Test → Release
@@ -38,6 +38,8 @@ AI creates an opportunity to bring automation further upstream, before the first
 
 ```text
 Intent → Plan → Implement → Verify & Remediate
+                                  ↓
+                       Human publication approval
                                   ↓
                          Reviewable pull request
                                   ↓
@@ -64,37 +66,9 @@ The goal is to establish a contract between the person requesting the change and
 
 One way to think about agentic engineering is to separate the reasoning layer from the execution and governance layers.
 
-```text
-             Human intent
-                  |
-         Requirement contract
-                  |
-         Workflow orchestration
-           /              \
-   Reasoning agents    Policy controls
-           \              /
-          Isolated working copy
-                  |
-         Implement + validate
-                  |
-         Pre-PR security gate <---------------+
-             /          \                     |
-          Pass         Findings               |
-           |              |                   |
-           |      Targeted remediation        |
-           |              |                   |
-           |      Revalidate changes ---------+
-           |      (bounded attempts)
-           |
-     Reviewable pull request
-     + verification evidence
-           |
-     Human review + CI/CD
-           |
-     Authorized merge / release
+![Governed agentic software delivery architecture: requirements, independent plan review, implementation, validation, security remediation loop, human publication approval, pull request, code review and CI/CD, then authorized merge or release.](/images/from-intent-to-code-architecture.svg)
 
- Unresolved findings → Block publication / escalate
-```
+*Reference architecture: independent security verification and two distinct human approval gates.*
 
 The reasoning layer proposes plans, interprets repository context, and generates changes.
 
@@ -176,7 +150,9 @@ Deterministic security scan <----------------+
        |                       |             |
        |               Rerun validation -----+
        |
-       +-- Pass --> Eligible for PR creation
+       +-- Pass --> Human publication approval
+                        |
+                 PR creation if approved
 
 Unresolved findings or retry limit reached:
     block publication and escalate for human review
@@ -206,13 +182,13 @@ Repository content, issue descriptions, and tool outputs should be treated as po
 
 Most importantly, the agent should not be able to approve its own privileged actions.
 
-Generating infrastructure code is not authorization to deploy it. Preparing a database migration is not authorization to execute it against production. Creating a proposed change is not authorization to merge it.
+Generating infrastructure code is not authorization to deploy it. Preparing a database migration is not authorization to execute it against production. Creating a proposed change is not authorization to publish it as a pull request. Approval to create the pull request is separate from approval to merge it.
 
 These boundaries should be enforced by the platform and external systems, not merely expressed as instructions to a model.
 
 ## Make the change explain itself
 
-The final output should be a reviewable pull request—not merely generated code—with a traceable connection to the original requirement, documented validation results, security findings, and clear human approval boundaries.
+The final output should be a reviewable pull request—not merely generated code—with a traceable connection to the original requirement, documented validation results, security findings, and clear human approval boundaries. A human should authorize publication after verification passes; the resulting pull request must still undergo independent code review and CI/CD checks before an authorized merge or release.
 
 In the target architecture, the pull request should link back to its originating work item, identify the intended reviewers, and make the relevant evidence accessible, either directly or through linked records:
 
