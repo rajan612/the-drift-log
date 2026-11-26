@@ -37,9 +37,11 @@ But it does not necessarily answer:
 AI creates an opportunity to bring automation further upstream, before the first line of code is written.
 
 ```text
-Intent → Plan → Implement → Verify → Review
-                                      |
-                                Existing CI/CD
+Intent → Plan → Implement → Verify & Remediate
+                                  ↓
+                         Reviewable pull request
+                                  ↓
+                          Existing CI/CD + review
 ```
 
 This is not a replacement for CI/CD. It is an extension of the engineering process around it.
@@ -63,28 +65,42 @@ The goal is to establish a contract between the person requesting the change and
 One way to think about agentic engineering is to separate the reasoning layer from the execution and governance layers.
 
 ```text
-                Human intent
-                     |
-            Requirement contract
-                     |
-            Workflow orchestration
-              /             \
-      Reasoning agents    Policy controls
-              \             /
-             Isolated execution
-                     |
-           Verification evidence
-                     |
-              Human review
-                     |
-                 CI/CD
+             Human intent
+                  |
+         Requirement contract
+                  |
+         Workflow orchestration
+           /              \
+   Reasoning agents    Policy controls
+           \              /
+          Isolated working copy
+                  |
+         Implement + validate
+                  |
+         Pre-PR security gate <---------------+
+             /          \                     |
+          Pass         Findings               |
+           |              |                   |
+           |      Targeted remediation        |
+           |              |                   |
+           |      Revalidate changes ---------+
+           |      (bounded attempts)
+           |
+     Reviewable pull request
+     + verification evidence
+           |
+     Human review + CI/CD
+           |
+     Authorized merge / release
+
+ Unresolved findings → Block publication / escalate
 ```
 
 The reasoning layer proposes plans, interprets repository context, and generates changes.
 
 The orchestration layer manages state, sequencing, timeouts, retries, and approval boundaries.
 
-The execution layer provides controlled access to tools, source code, and test environments.
+The execution layer provides access to tools, source code, and test environments; stronger runtime isolation is a separate security design goal.
 
 The policy layer determines what actions are permitted, regardless of what the model proposes.
 
@@ -141,13 +157,50 @@ A Python service, a TypeScript application, and an infrastructure repository may
 
 Existing checks should not be weakened merely to make an agent-generated change pass. Changes to tests or security policies deserve their own scrutiny.
 
+### Shift security left with agentic remediation
+
+Security scanning should not be limited to identifying vulnerabilities after a pull request has already been created.
+
+An agentic delivery platform can introduce a security gate before publication. Generated changes are checked against deterministic security rules, and actionable findings are passed to a specialized remediation agent.
+
+The remediation agent proposes targeted fixes in an isolated working copy. The platform then independently rescans the modified code, reruns relevant validation, and requests further review when necessary.
+
+```text
+Generated change
+       |
+Deterministic security scan <----------------+
+       |                                     |
+       +-- Findings --> Remediation agent    |
+       |                       |             |
+       |               Targeted fix          |
+       |                       |             |
+       |               Rerun validation -----+
+       |
+       +-- Pass --> Eligible for PR creation
+
+Unresolved findings or retry limit reached:
+    block publication and escalate for human review
+```
+
+Importantly, the agent does not decide whether its own remediation succeeded. The verification layer makes that determination. A scanner passing means that the configured checks passed, not that the code is free of vulnerabilities. Disabling a check or weakening a policy is not an acceptable substitute for fixing a finding.
+
+Consider an illustrative infrastructure change that permits unrestricted inbound access to an administrative service. A native configuration rule detects the overly permissive setting. A remediation agent proposes narrowing access to the intended network boundary. The platform reruns the security scan and infrastructure validation to establish whether the revised change meets the requirement. If the intended boundary is unknown, it should stop and ask rather than invent a trusted network.
+
+This approach can reduce security findings that reach the pull-request stage while preserving independent security checks in the existing CI/CD pipeline. It is a feedback loop, not a replacement for defense in depth.
+
+Native configuration and policy checks address a defined set of known insecure patterns. They are distinct from continuously updated CVE intelligence. A more mature implementation could combine those checks with current vulnerability advisories and dependency inventories, allowing agents to identify known vulnerable dependencies and propose upgrades before changes reach code review. Such upgrades would still require compatibility testing and independent verification.
+
 ## Give agents tools, not unlimited authority
 
 A coding agent becomes more useful when it can inspect files, run tests, and interact with development tools.
 
 It also becomes more capable of causing unintended damage.
 
-An execution environment should therefore provide the minimum permissions necessary for the current task. Working copies can be isolated, credentials scoped and short-lived, network access constrained, and destructive operations subject to explicit authorization.
+An execution environment should therefore provide the minimum permissions necessary for the current task.
+
+There is an important distinction between an isolated Git working copy and a hardened security sandbox. A separate checkout helps prevent ordinary edits from disrupting another working tree, but it does not by itself prevent an AI-powered CLI from accessing other local files, environment credentials, or network resources available to its process.
+
+A stronger target architecture would enforce process or workload isolation, scoped and short-lived credentials, restricted filesystem access, constrained network egress, and explicit authorization for destructive operations. These controls need to be implemented and tested separately; they should not be assumed merely because the agent operates in its own working copy.
 
 Repository content, issue descriptions, and tool outputs should be treated as potentially untrusted inputs. Instructions embedded in a file should not override system policy or grant additional permissions.
 
@@ -159,19 +212,20 @@ These boundaries should be enforced by the platform and external systems, not me
 
 ## Make the change explain itself
 
-The final output should not be just a commit.
+The final output should be a reviewable pull request—not merely generated code—with a traceable connection to the original requirement, documented validation results, security findings, and clear human approval boundaries.
 
-It should be a reviewable change accompanied by evidence:
+In the target architecture, the pull request should link back to its originating work item, identify the intended reviewers, and make the relevant evidence accessible, either directly or through linked records:
 
 - The requirement it addresses.
 - The implementation decisions and their rationale.
 - The checks that ran and their actual outcomes.
+- Security findings, remediation outcomes, and any unresolved blockers or approved exceptions.
 - Known limitations and unresolved risks.
 - Any relevant operational or rollback considerations.
 
 For example, an infrastructure change may compile and pass policy validation without ever having been applied. The review record should distinguish those facts. "Validated" should not imply "deployed."
 
-A reviewer should be able to understand the change without reading an entire agent conversation.
+A reviewer should be able to understand the change without reading an entire agent conversation. Complete evidence publication is an architectural goal; a pull request alone does not establish that every validation or remediation report has been captured.
 
 ## Design for interruptions, not just the happy path
 
