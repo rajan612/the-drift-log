@@ -1,6 +1,6 @@
 ---
 title: 'Designing a Production-Ready MLflow Platform on AWS'
-description: 'A practical architecture for isolating MLflow environments, protecting persistence, managing secrets, and planning a controlled production rollout.'
+description: 'How I modernized MLflow on AWS, completed the production cutover, and validated a secure model-delivery pattern using Amazon S3 Files.'
 pubDate: '2026-09-27T20:58:00-04:00'
 ---
 
@@ -10,7 +10,9 @@ Running MLflow as a platform that other teams depend on is a different problem.
 
 The difference is mostly everything surrounding the MLflow process: persistence, authentication, secrets, networking, DNS, TLS, deployment behavior, environment isolation, recovery, and how you move users from an old endpoint to a new one without turning the migration into an incident.
 
-This is the architecture pattern I use when thinking about a production-ready MLflow deployment on AWS.
+This article describes a platform modernization I worked on, from designing the AWS infrastructure to completing the production cutover. It also covers the next layer of the platform: delivering approved model versions to compute instances through Amazon S3 Files.
+
+*Updated November 26, 2026: production cutover completed; approved-model mounting isolation validated in a sandbox.*
 
 ```text
 Users / applications
@@ -211,6 +213,14 @@ Trying to solve every identity requirement before proving that the service, data
 
 The trick is to use temporary authentication as a validation stage, not as the permanent target state.
 
+## From authentication to model-level authorization
+
+The modernization introduced Okta SSO for interactive users, alongside dedicated service identities for automated ingestion and API access. Existing platform access groups were associated with the MLflow application, removing the need for a separate manual SSO onboarding process for those users.
+
+Authentication alone does not grant access to every model. Workspaces provide logical boundaries for model catalogs, while role-based permissions determine which users and services can read or manage registered models. In development, I tested this with a restricted service identity: it could retrieve an authorized model while attempts to access two other models were denied.
+
+That separation is especially important when models are consumed by compute instances. A person signing in to the registry, an ingestion service registering artifacts, and an EC2 instance loading weights should not all inherit the same privileges.
+
 ## Blue/green thinking matters even when there is only one server
 
 One of the safest ways to modernize an existing shared MLflow endpoint is not to mutate it in place.
@@ -236,7 +246,7 @@ DNS / application configuration
           new endpoint
 ```
 
-That gives you a clean rollback:
+That gives you a straightforward endpoint rollback option, provided that database and artifact changes after cutover are also accounted for:
 
 ```text
 cutover problem?
@@ -269,23 +279,158 @@ For example, creating a disposable validation experiment is much more meaningful
 
 It proves that the request reached the application, authentication worked, the server could write metadata, and the database path was functional.
 
-## Production-ready does not mean production-complete
+## Completing the production cutover
 
-There is an important distinction between **designing for production** and claiming a production migration is complete.
+The production DNS cutover has now been completed. Instead of requiring application teams to change their integrations, the replacement service took over the existing production hostname.
 
-A production-ready platform can have:
+The rollout followed a staged approach:
 
-- production-grade isolation,
-- private networking,
-- managed persistence,
-- TLS,
-- secret management,
-- deployment controls,
-- rollback planning,
+- Validate the independent development and sandbox deployments.
+- Establish SSO, service identities and workspace-level access boundaries.
+- Test model registry access and authorized versus unauthorized model retrieval.
+- Deploy the replacement production infrastructure alongside the legacy service.
+- Switch production DNS to the new endpoint while retaining the existing URL.
 
-while the rollout itself is still moving through development, sandbox, and final production validation.
+Users who had temporarily overridden DNS during pre-cutover testing were asked to remove those overrides so they could resolve the production endpoint normally.
 
-That distinction keeps architecture claims accurate and makes project status easier for everyone to understand.
+The production migration milestone is complete. Model distribution through mounted storage is a separate enhancement, with its own validation and rollout gates.
+
+## Beyond the model registry: delivering approved models to compute
+
+A model registry answers questions about model identity, version, provenance and access. But the workload still needs to obtain the model's actual files.
+
+For an inference workload using large model weights, tokenizers and configuration files, downloading the same model separately to every EC2 instance can increase startup time, local disk consumption and operational effort. Giving those instances broad S3 permissions to solve that problem creates a different issue: a workload may be able to retrieve models that were never approved for it.
+
+The design goal is therefore not just to make files accessible. It is to expose **only the approved, immutable model versions** to the intended workload.
+
+Amazon S3 Files, which presents S3 objects through a shared file system, provides a useful mechanism for doing this. Unlike a generic mount of the entire artifact bucket, a scoped mount can expose a particular model version as a normal local directory.
+
+### Separate registry storage from the approved model library
+
+I designed a model-delivery layer with a controlled publication boundary between raw artifacts and the versions available for consumption.
+
+```text
+MLflow tracking server + model registry
+                |
+         Registration / validation
+                |
+         Approved model catalog
+                |
+         Versioned S3 model library
+                |
+         Amazon S3 Files
+                |
+        Model-version access points
+                |
+        Read-only EC2 model mounts
+```
+
+The model catalog maps the workspace, registered model name and exact version to the corresponding artifact location and file inventory. It also records readiness and the access-point reference. A publication process should verify that the complete model bundle is present before making it mountable.
+
+A simplified, illustrative library layout might look like this:
+
+```text
+model-library/
+  models/
+    model-a/
+      v1/
+        manifest.json
+        config.json
+        model.safetensors
+      v2/
+        manifest.json
+        config.json
+        model.safetensors
+    model-b/
+      v1/
+        manifest.json
+        model.safetensors
+```
+
+The real object layout can differ from this example. The important property is that each version resolves to a stable, non-overlapping prefix with a verified manifest. The publisher must enforce immutability; naming a prefix `v1` does not make its contents immutable by itself.
+
+This approach keeps model publication separate from model consumption. A new experiment, a new registry version, or a mutable alias changing targets must not silently replace the bytes that an approved workload sees.
+
+### Mount the version, not the entire model library
+
+An S3 Files access point can present a specific directory as the root of a mount. A version-specific access point, coupled with workload authorization, lets the platform expose paths like these:
+
+```text
+Instance A
+  /models/model-a/v1    allowed, read-only
+  /models/model-b/v1    not authorized
+
+Instance B
+  /models/model-b/v1    allowed, read-only
+  /models/model-a/v1    not authorized
+```
+
+The proposed provisioning flow is:
+
+1. A project requests access to a registered model and an exact version.
+2. The platform checks the approval and resolves the validated artifact manifest.
+3. A privileged provisioning service associates the approved access point and exact S3 object prefix with the workload's IAM role.
+4. The instance mounts the approved version at a deterministic local path.
+5. Approval changes trigger reconciliation of permissions and mount configuration.
+
+The model registry is the source of model identity; the approval workflow determines which workload should receive access; AWS enforces the resulting storage permissions.
+
+### Enforce authorization at every storage path
+
+An access point is a namespace boundary, not a complete identity authorization policy. I use a layered design:
+
+- **Network:** permit NFS connectivity on TCP 2049 only from intended compute networks to the mount targets.
+- **File system policy:** restrict each workload role to its approved access-point ARNs, with explicit denies for other access points and direct root mounts.
+- **Workload IAM:** allow read access through `s3files:ClientMount`; deny write and root privileges for the consumer role.
+- **S3 permissions:** scope direct `s3:GetObject` and `s3:GetObjectVersion` to approved version prefixes; do not grant unrestricted bucket listing or reads. Apply bucket-policy and KMS controls where appropriate.
+- **Local mount:** mount read-only and configure operating-system access for the intended workload.
+
+The fourth layer is particularly important. S3 Files can serve reads directly from S3, so file-system permissions alone cannot prevent a workload with overly broad object-storage permissions from bypassing the mount. The direct-read permissions must describe the same approved version boundary as the file-system policy.
+
+Similarly, an EC2 role is a workload identity, not an individual MLflow user's identity. On shared compute, per-user isolation requires additional operating-system or workload isolation; a mount does not inherit a person's SSO permissions.
+
+See AWS's documentation on [S3 Files client access policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-access-point-policy-examples.html) and [IAM authorization for S3 Files](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-security-iam.html).
+
+### Prepare compute instances for model mounting
+
+For supported Linux EC2 instances, the S3 Files mount helper is provided by `amazon-efs-utils` (version 3.0.0 or later). The platform's machine image or bootstrap process should install the helper and its dependencies, attach the approved instance profile, and verify DNS, mount-target connectivity and access to S3.
+
+An illustrative mount command is:
+
+```bash
+sudo mkdir -p /models/model-a/v1
+
+sudo mount -t s3files \
+  -o ro,accesspoint=fsap-EXAMPLE \
+  fs-EXAMPLE:/ /models/model-a/v1
+
+findmnt -T /models/model-a/v1
+```
+
+The filesystem and access-point IDs above are placeholders. S3 Files uses authenticated, encrypted mount connections; a local read-only flag is an additional safeguard, not a substitute for IAM enforcement.
+
+Mount configuration can be generated from approved entitlements and reapplied at instance startup. Revocation needs special attention: remove permissions, unmount the affected path, and test existing connections as well as new ones. Previously downloaded or cached copies cannot be assumed to disappear when approval is revoked.
+
+See the [EC2 mounting instructions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-mounting.html) for current prerequisites and supported operating systems.
+
+### Validate the negative cases, not just the successful mount
+
+In a sandbox proof of concept, I tested the isolation boundary using two model prefixes and a restricted compute identity. The tests covered:
+
+| Test | Observed result |
+| --- | --- |
+| Mount and read the authorized model | Allowed |
+| Mount the other model's access point | Denied |
+| Write to the read-only model mount | Denied |
+| Mount the file-system root | Denied |
+| List the underlying bucket directly | Denied |
+| Read an unauthorized model object directly from S3 | Denied |
+
+A successful mount alone would not have demonstrated that the design was secure. Testing the alternate paths was the most valuable part of the exercise.
+
+The next rollout gates are end-to-end approval-driven provisioning, policy reconciliation and revocation, concurrent multi-instance access, and production-scale performance and cost validation. Access-point and policy quotas also need to be accounted for as the number of versions and workloads grows.
+
+The intended benefits are fewer redundant local model copies, a simpler model-loading experience and a storage authorization boundary tied to exact model versions. Startup latency, storage savings and operating cost should be benchmarked before claiming quantified improvements.
 
 ## The operational goal
 
@@ -294,5 +439,7 @@ The best outcome is not "MLflow is running."
 It is:
 
 > MLflow becomes a boring internal platform that can be deployed, upgraded, recovered, authenticated, and handed to another engineer without requiring tribal knowledge.
+
+The same principle applies to model delivery: the workload should see the model versions it is authorized to consume, through a repeatable and auditable provisioning process, rather than receiving access to an entire artifact store.
 
 That is the difference between standing up a tool and engineering a platform.
